@@ -1,0 +1,17 @@
+{
+    "use_remote_db": true,
+    "remote_db_config": {
+        "database1": "postgresql://user:password@host/db1",
+        "database2": "postgresql://user:password@host/db2",
+        "database3": "postgresql://user:password@host/db3"
+    },
+    "local_db_paths": {
+        "database1": "path/to/local/database1.db",
+        "database2": "path/to/local/database2.db",
+        "database3": "path/to/local/database3.db"
+    },
+    "other_config": {
+        "app_name": "MyApplication",
+        "version": "1.0.0"
+    }
+}
