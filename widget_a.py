@@ -18,6 +18,11 @@ class WidgetA(QWidget):
 
     def query_db1(self):
         session = self.db_manager.get_session('database1')
-        result = session.query(ExampleTable1).all()
-        session.close()
-        print([r.__dict__ for r in result])
+        try:
+            result = session.query(ExampleTable1).all()
+            print([r.__dict__ for r in result])
+        except Exception as e:
+            session.rollback()
+            print(f"Error occurred: {e}")
+        finally:
+            session.close()

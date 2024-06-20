@@ -11,7 +11,7 @@ class MainWindow(QMainWindow):
         self.db_manager = db_manager
         self.other_config = other_config
         self.setWindowTitle(self.other_config.app_name)
-        
+
         self.init_ui()
 
     def init_ui(self):
@@ -46,7 +46,7 @@ class MainWindow(QMainWindow):
         self.db_manager.cleanup()
         event.accept()
 
-   # Main application entry point, simplified
+# Main application entry point, simplified
 if __name__ == '__main__':
     config_file = 'path/to/config.json'
 

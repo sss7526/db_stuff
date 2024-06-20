@@ -15,21 +15,21 @@ class DatabaseManager:
 
     def setup_databases(self):
         if self.config.use_remote_db:
-            # Setup remote PostgreSQL databases
             self.setup_remote_database('database1', self.config.remote_db_config.database1)
             self.setup_remote_database('database2', self.config.remote_db_config.database2)
             self.setup_remote_database('database3', self.config.remote_db_config.database3)
         else:
-            # Setup local SQLite databases
             self.setup_local_database('database1', self.config.local_db_paths.database1, in_memory=True)
             self.setup_local_database('database2', self.config.local_db_paths.database2, in_memory=False)
             self.setup_local_database('database3', self.config.local_db_paths.database3, in_memory=False)
 
     def setup_remote_database(self, db_key, db_url):
-        self.engines[db_key] = create_engine(db_url)
-        self.metadata[db_key] = MetaData(bind=self.engines[db_key])
+        engine = create_engine(db_url)
+        session_factory = sessionmaker(bind=engine)
+        self.engines[db_key] = engine
+        self.metadata[db_key] = MetaData(bind=engine)
         self.metadata[db_key].reflect()
-        self.sessions[db_key] = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=self.engines[db_key]))
+        self.sessions[db_key] = scoped_session(session_factory)
 
     def setup_local_database(self, db_key, db_path, in_memory):
         if in_memory:
@@ -37,11 +37,12 @@ class DatabaseManager:
             engine = self.create_memory_engine(conn)
         else:
             engine = create_engine(f'sqlite:///{db_path}')
-        
+            
+        session_factory = sessionmaker(bind=engine)
         self.engines[db_key] = engine
         self.metadata[db_key] = MetaData(bind=engine)
         self.metadata[db_key].reflect()
-        self.sessions[db_key] = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
+        self.sessions[db_key] = scoped_session(session_factory)
 
     def copy_db_to_memory(self, source_db_path):
         source_conn = sqlite3.connect(source_db_path)
@@ -57,13 +58,12 @@ class DatabaseManager:
 
     def get_session(self, db_key):
         return self.sessions[db_key]
-    
+
     def cleanup(self):
-        # Close all sessions and dispose all engines
         for key in self.sessions:
-            self.sessions[key].remove()
+            self.sessions[key].remove()  # Remove the session
         for key in self.engines:
-            self.engines[key].dispose()
+            self.engines[key].dispose()  # Dispose the engine
 
 # Base class for SQLAlchemy models
 Base = declarative_base()
