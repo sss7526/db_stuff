@@ -41,6 +41,11 @@ class MainWindow(QMainWindow):
     def show_widget_b(self):
         self.stacked_widget.setCurrentWidget(self.widget_b)
 
+    def closeEvent(self, event):
+        # Perform cleanup before closing
+        self.db_manager.cleanup()
+        event.accept()
+
    # Main application entry point, simplified
 if __name__ == '__main__':
     config_file = 'path/to/config.json'

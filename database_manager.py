@@ -57,6 +57,13 @@ class DatabaseManager:
 
     def get_session(self, db_key):
         return self.sessions[db_key]
+    
+    def cleanup(self):
+        # Close all sessions and dispose all engines
+        for key in self.sessions:
+            self.sessions[key].remove()
+        for key in self.engines:
+            self.engines[key].dispose()
 
 # Base class for SQLAlchemy models
 Base = declarative_base()
