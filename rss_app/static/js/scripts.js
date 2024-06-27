@@ -3,7 +3,7 @@ const limit = 10;
 
 function renderDocument(document) {
     let html = `
-        <div class="card mb-3 data-id="${document._id['$oid']}">
+        <div class="card mb-3 data-id="${document._id}">
             <div class="card-body">
                 <h5 class="card-title">${document.title}</h5>
                 <h6 class="card-subtitle mb-2 text-muted">${new Date(document.datetime).toLocaleString()}</h6>
@@ -30,7 +30,7 @@ function fetchDocuments(page, limit) {
 function checkForNewDocuments() {
     const firstDocumentId = $('#documents').children().first().attr('data-id');
     $.getJSON('/latest_document', function(data) {
-        if (data && data._id['$oid'] !== firstDocumentId) {
+        if (data && data._id !== firstDocumentId) {
             $('#new-documents-indicator').show();
         }
     });
@@ -58,7 +58,7 @@ $(document).ready(function() {
         currentPage = 1; // Reset the current page to 1
         $('#new-documents-indicator').hide(); // Hide the indicator after refreshing
     });
-    
+
     // Periodically check for new documents without refreshing the feed
     setInterval(checkForNewDocuments, 10000); // Check every 10 seconds
 });
