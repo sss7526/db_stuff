@@ -1,0 +1,5 @@
+Flask
+Bootstrap-Flask
+Flask-PyMongo
+Flask-SSE
+python-dotenv
