@@ -3,7 +3,7 @@ const limit = 10;
 
 function renderDocument(document) {
     let html = `
-        <div class="card mb-3">
+        <div class="card mb-3 data-id="${document._id['$oid']}">
             <div class="card-body">
                 <h5 class="card-title">${document.title}</h5>
                 <h6 class="card-subtitle mb-2 text-muted">${new Date(document.datetime).toLocaleString()}</h6>
@@ -14,15 +14,31 @@ function renderDocument(document) {
     $('#documents').prepend(html);
 }
 
+function renderDocuments(documents, clear = false) {
+    if (clear) {
+        $('#documents').empty();
+    }
+    documents.forEach(doc => renderDocument(doc));
+}
+
 function fetchDocuments(page, limit) {
     $.getJSON(`/get_documents?page=${page}&limit=${limit}`, function(data) {
-        data.forEach(doc => renderDocument(doc));
+        renderDocuments(data, clear);
+    });
+}
+
+function checkForNewDocuments() {
+    const firstDocumentId = $('#documents').children().first().attr('data-id');
+    $.getJSON('/latest_document', function(data) {
+        if (data && data._id['$oid'] !== firstDocumentId) {
+            $('#new-documents-indicator').show();
+        }
     });
 }
 
 $(document).ready(function() {
     // Initial fetch
-    fetchDocuments(currentPage, limit);
+    fetchDocuments(currentPage, limit, true);
 
     // Load more documents on button click
     $('#load-more').click(function() {
@@ -30,9 +46,19 @@ $(document).ready(function() {
         fetchDocuments(currentPage, limit);
     });
 
-    // Set up SSE for real-time updates
-    const eventSource = new EventSource("/stream");
-    eventSource.addEventListener("new_document", function(event) {
-        renderDocument(JSON.parse(event.data));
+    // Refresh feed on button click
+    $('#refresh-feed').click(function() {
+        fetchDocuments(1, limit, true);
+        currentPage = 1;
     });
+
+    // Refresh now button inside the indicator
+    $('#refresh-now').click(function() {
+        fetchDocuments(1, limit, true);
+        currentPage = 1; // Reset the current page to 1
+        $('#new-documents-indicator').hide(); // Hide the indicator after refreshing
+    });
+    
+    // Periodically check for new documents without refreshing the feed
+    setInterval(checkForNewDocuments, 10000); // Check every 10 seconds
 });

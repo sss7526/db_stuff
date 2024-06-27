@@ -21,3 +21,11 @@ def get_documents():
             doc['image'] = convert_image(doc['image'])
     
     return jsonify(documents)
+
+@main_bp.route('/latest_document')
+def latest_document():
+    document = mongo.db.mydatabase.mycollection.find_one(sort=[('datetime', DESCENDING)])
+    if document and 'image' in document:
+        document['image'] = convert_image(document['image'])
+    
+    return jsonify(document)
